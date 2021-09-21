@@ -19,28 +19,26 @@ class OSCNScraper {
     });
 
     for (let index = 0; index < links.length; index++) {
-      try {
-        const link = links[index];
+      const link = links[index];
 
-        const linkPage = await this.getPage(`${this.baseURL}${link}`);
-        const $link = cheerio.load(linkPage);
+      const linkPage = await this.getPage(`${this.baseURL}${link}`);
+      console.log(`checking page ${link} for files`);
+      const $link = cheerio.load(linkPage);
 
-        $link(".docketEntry a").each((i, e) => {
-          try {
-            const imageUrl = $(e).attr("href");
-            const caseName = imageUrl.split("=").pop();
-            const fileLocation = `${this.baseURL}${imageUrl}`;
-            const file = fs.createWriteStream(`./files/${caseName}.tiff`);
-            https.get(fileLocation, (res) => {
-              res.pipe(file);
-            });
-          } catch (error) {
-            console.log("error occurred when downloading file", error);
-          }
+      $link(".docketEntry a").each((i, e) => {
+        const imageUrl = $(e).attr("href");
+        const queryParams = imageUrl.split("&");
+        const barcode = queryParams[queryParams.length - 1].split("=")[1];
+        const caseNumber = queryParams[queryParams.length - 3].split("=")[1];
+        const fileLocation = `${this.baseURL}${imageUrl}`;
+        console.log(`grabbing file from ${fileLocation}`);
+        const file = fs.createWriteStream(
+          `./files/${caseNumber}-${barcode}.tif`
+        );
+        https.get(fileLocation, (res) => {
+          res.pipe(file);
         });
-      } catch (error) {
-        console.log("error occurred looping through the links", error);
-      }
+      });
     }
   };
 

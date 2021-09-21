@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node oscn.mjs"
+    "start": "node oscn.mjs",
+    "clean": "rm -rf node_modules && rm -rf files && mkdir files"
   },
   "keywords": [],
   "author": "",
