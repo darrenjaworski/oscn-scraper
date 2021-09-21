@@ -1,7 +1,7 @@
-import puppeteer from "puppeteer";
 import cheerio from "cheerio";
 import fs from "fs";
 import https from "https";
+import fetch from "node-fetch";
 
 class OSCNScraper {
   baseURL = "https://www.oscn.net/applications/oscn/";
@@ -47,22 +47,9 @@ class OSCNScraper {
   };
 
   getPage = async (url) => {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    page.on("request", async (request) => {
-      if (
-        ["image", "stylesheet", "font"].indexOf(request.resourceType()) !== -1
-      ) {
-        await request.abort();
-      } else {
-        await request.continue();
-      }
-    });
-    await page.goto(url, { waitUntil: "networkidle2" });
-    const html = await page.content();
-    await browser.close();
-
-    return html;
+    const response = await fetch(url);
+    const body = await response.text();
+    return body;
   };
 }
 
