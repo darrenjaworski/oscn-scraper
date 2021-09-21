@@ -35,9 +35,13 @@ class OSCNScraper {
         const file = fs.createWriteStream(
           `./files/${caseNumber}-${barcode}.tif`
         );
-        https.get(fileLocation, (res) => {
-          res.pipe(file);
-        });
+        try {
+          https.get(fileLocation, (res) => {
+            res.pipe(file);
+          });
+        } catch (error) {
+          console.log(error);
+        }
       });
     }
   };
