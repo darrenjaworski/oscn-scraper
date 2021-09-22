@@ -1,14 +1,15 @@
 import cheerio from "cheerio";
 import fs from "fs";
 import https from "https";
-import fetch from "node-fetch";
 import pkg from "date-fns";
 
 const { format, addDays, compareDesc } = pkg;
+const sleep = () =>
+  new Promise((resolve) => setTimeout(resolve, Math.Random * 100));
 
 class OSCNScraper {
   baseURL = "https://www.oscn.net/applications/oscn/";
-  startDate = new Date(2019, 0, 1); // month is zero indexed, start of the year;
+  startDate = new Date(2021, 6, 1); // month is zero indexed, start of the year;
   endDate = new Date();
   evictionText = RegExp("FORCIBLE ENTRY & DETAINER");
 
@@ -17,7 +18,6 @@ class OSCNScraper {
     // loop through dates
     while (compareDesc(searchDate, this.endDate) > 0) {
       const url = this.getSearchUrl(searchDate);
-      console.log(url);
       const reportPage = await this.getPage(url);
 
       console.log(`searching for cases on ${format(searchDate, "MM/dd/yyyy")}`);
@@ -31,19 +31,62 @@ class OSCNScraper {
   };
 
   getPage = async (url) => {
-    let body = "";
-    let response = undefined;
+    return new Promise((resolve, reject) => {
+      https
+        .get(url, (res) => {
+          let data = "";
+          res.on("data", (chunk) => {
+            data += chunk.toString();
+          });
+          res.on("end", () => {
+            resolve(data);
+          });
+          res.on("error", async () => {
+            console.log(error);
+            await sleep();
+            return await this.getPage(url);
+          });
+        })
+        .on("error", async (error) => {
+          console.log(error);
+          await sleep();
+          return await this.getPage(url);
+        });
+    });
+  };
 
-    try {
-      response = await fetch(url);
-      body = await response.text();
+  downloadFile = async (url, dateString, caseNumber, barcode) => {
+    return new Promise((resolve, reject) => {
+      const directory = `./files/${dateString}`;
 
-      return body;
-    } catch (error) {
-      console.log(error);
-    }
+      if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory);
+      }
 
-    return body;
+      const file = fs.createWriteStream(
+        `${directory}/${caseNumber}-${barcode}.tif`
+      );
+
+      https
+        .get(url, (res, reject) => {
+          res.pipe(file);
+          res.on("error", async () => {
+            console.log(error);
+            await sleep();
+            return await this.downloadFile(
+              url,
+              dateString,
+              caseNumber,
+              barcode
+            );
+          });
+        })
+        .on("error", async (error) => {
+          console.log(error);
+          await sleep();
+          return await this.downloadFile(url, dateString, caseNumber, barcode);
+        });
+    });
   };
 
   getSearchUrl = (date) => {
@@ -69,7 +112,6 @@ class OSCNScraper {
 
       const textTags = $link(".docketEntry font > font");
 
-      console.log(`searching page ${link} for evictions`);
       for (let index = 0; index < textTags.length; index++) {
         const tag = textTags[index];
         const text = $(tag).text();
@@ -80,28 +122,14 @@ class OSCNScraper {
 
       if (!hasForcibleEntry) continue;
 
-      console.log(`${link} has an eviction`);
-      console.log("searching page for files");
-
-      $link(".docketEntry a").each((i, e) => {
+      $link(".docketEntry a").each(async (i, e) => {
         const imageUrl = $(e).attr("href");
         const queryParams = imageUrl.split("&");
         const barcode = queryParams[queryParams.length - 1].split("=")[1];
         const caseNumber = queryParams[queryParams.length - 3].split("=")[1];
-        const fileLocation = `${this.baseURL}${imageUrl}`;
+        const fileURL = `${this.baseURL}${imageUrl}`;
 
-        try {
-          console.log(`grabbing file from ${fileLocation}`);
-          const file = fs.createWriteStream(
-            `./files/${dateString}-${caseNumber}-${barcode}.tif`
-          );
-
-          https.get(fileLocation, (res) => {
-            res.pipe(file);
-          });
-        } catch (error) {
-          console.log(error);
-        }
+        await this.downloadFile(fileURL, dateString, caseNumber, barcode);
       });
     }
   };
