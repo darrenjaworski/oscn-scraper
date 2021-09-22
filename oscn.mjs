@@ -8,7 +8,7 @@ const { format, addDays, compareDesc } = pkg;
 
 class OSCNScraper {
   baseURL = "https://www.oscn.net/applications/oscn/";
-  startDate = new Date(2020, 0, 1); // month is zero indexed, start of the year;
+  startDate = new Date(2021, 0, 28); // month is zero indexed, start of the year;
   endDate = new Date();
   evictionText = RegExp("FORCIBLE ENTRY & DETAINER");
 
@@ -108,4 +108,5 @@ class OSCNScraper {
 }
 
 const scraper = new OSCNScraper();
+
 scraper.main();
