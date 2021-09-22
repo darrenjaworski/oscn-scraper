@@ -9,7 +9,7 @@ const sleep = () =>
 
 class OSCNScraper {
   baseURL = "https://www.oscn.net/applications/oscn/";
-  startDate = new Date(2021, 6, 1); // month is zero indexed, start of the year;
+  startDate = new Date(2019, 0, 1); // month is zero indexed, start of the year;
   endDate = new Date();
   evictionText = RegExp("FORCIBLE ENTRY & DETAINER");
 
