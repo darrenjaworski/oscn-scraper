@@ -41,11 +41,6 @@ class OSCNScraper {
           res.on("end", () => {
             resolve(data);
           });
-          res.on("error", async () => {
-            console.log(error);
-            await sleep();
-            return await this.getPage(url);
-          });
         })
         .on("error", async (error) => {
           console.log(error);
@@ -70,16 +65,6 @@ class OSCNScraper {
       https
         .get(url, (res, reject) => {
           res.pipe(file);
-          res.on("error", async () => {
-            console.log(error);
-            await sleep();
-            return await this.downloadFile(
-              url,
-              dateString,
-              caseNumber,
-              barcode
-            );
-          });
         })
         .on("error", async (error) => {
           console.log(error);
