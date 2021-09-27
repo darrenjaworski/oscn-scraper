@@ -102,9 +102,7 @@ class OSCNScraper {
     };
 
     searchDayReportPage = async (pageContent, dateString) => {
-        console.log(
-            `searching for cases on ${format(searchDate, "MM/dd/yyyy")}`
-        );
+        console.log(`searching for cases on ${dateString}`);
 
         const $ = cheerio.load(pageContent);
         let links = [];
