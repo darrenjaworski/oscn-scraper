@@ -52,7 +52,8 @@ class OSCNScraper {
 
   downloadFile = async (url, dateString, caseNumber, barcode) => {
     return new Promise((resolve, reject) => {
-      const directory = `./files/${dateString}`;
+      const dateParts = dateString.split("-");
+      const directory = `./files/${dateParts[2]}/${dateParts[0]}-${dateParts[1]}`;
 
       if (!fs.existsSync(directory)) {
         fs.mkdirSync(directory);
