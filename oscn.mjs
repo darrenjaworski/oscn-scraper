@@ -1,10 +1,10 @@
-import DateFns from "date-fns";
+import datefns from "date-fns";
 import fs from "fs";
 import https from "https";
 import jsdom from "jsdom";
 
 const { JSDOM } = jsdom;
-const { format, addDays, compareDesc } = DateFns;
+const { format, addDays, compareDesc } = datefns;
 const sleep = () =>
     new Promise((resolve) => setTimeout(resolve, Math.random() * 2000));
 
