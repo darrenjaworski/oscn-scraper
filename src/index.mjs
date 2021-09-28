@@ -64,7 +64,7 @@ class OSCNScraper {
         attempts = 0
     ) => {
         const dateParts = dateString.split("-");
-        const directory = `./files/${dateParts[2]}/${dateParts[0]}-${dateParts[1]}`;
+        const directory = `../files/${dateParts[2]}/${dateParts[0]}-${dateParts[1]}`;
         const filePath = `${directory}/${caseNumber}-${barcode}.tif`;
 
         if (fs.existsSync(filePath)) return;

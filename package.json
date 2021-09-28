@@ -2,9 +2,9 @@
   "name": "oscn-scraper",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node oscn.mjs",
+    "start": "node src/index.mjs",
     "clean": "rm -rf node_modules && rm -rf files && mkdir files"
   },
   "keywords": [],
@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "date-fns": "^2.24.0",
-    "jsdom": "^17.0.0"
+    "jsdom": "^17.0.0",
+    "node": "^14.17.6"
   }
 }
