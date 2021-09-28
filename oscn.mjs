@@ -10,7 +10,7 @@ const sleep = () =>
 
 class OSCNScraper {
     baseURL = "https://www.oscn.net/applications/oscn/";
-    startDate = new Date(2020, 0, 1); // month is zero indexed, start of the year;
+    startDate = new Date(2017, 0, 1); // month is zero indexed, start of the year;
     endDate = new Date();
     evictionText = RegExp("FORCIBLE ENTRY & DETAINER");
 
@@ -65,14 +65,15 @@ class OSCNScraper {
     ) => {
         const dateParts = dateString.split("-");
         const directory = `./files/${dateParts[2]}/${dateParts[0]}-${dateParts[1]}`;
+        const filePath = `${directory}/${caseNumber}-${barcode}.tif`;
+
+        if (fs.existsSync(filePath)) return;
 
         if (!fs.existsSync(directory)) {
             fs.mkdirSync(directory, { recursive: true });
         }
 
-        const file = fs.createWriteStream(
-            `${directory}/${caseNumber}-${barcode}.tif`
-        );
+        const file = fs.createWriteStream(filePath);
 
         https
             .get(url, (res, reject) => {
