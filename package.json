@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "cheerio": "^1.0.0-rc.10",
-    "date-fns": "^2.24.0"
+    "date-fns": "^2.24.0",
+    "jsdom": "^17.0.0"
   }
 }

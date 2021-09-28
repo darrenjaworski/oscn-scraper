@@ -1,8 +1,9 @@
-import cheerio from "cheerio";
 import DateFns from "date-fns";
 import fs from "fs";
 import https from "https";
+import jsdom from "jsdom";
 
+const { JSDOM } = jsdom;
 const { format, addDays, compareDesc } = DateFns;
 const sleep = () =>
     new Promise((resolve) => setTimeout(resolve, Math.random() * 2000));
@@ -20,7 +21,7 @@ class OSCNScraper {
             const url = this.getSearchUrl(searchDate);
             const reportPage = await this.getPage(url);
 
-            await this.searchDayReportPage(
+            this.searchDayReportPage(
                 reportPage,
                 format(searchDate, "MM-dd-yyyy")
             );
@@ -43,7 +44,7 @@ class OSCNScraper {
                 })
                 .on("error", async (error) => {
                     console.log(error);
-                    if ((attempts = 5)) {
+                    if (attempts == 5) {
                         console.log(
                             `Tried to get page ${url} five times and failed.`
                         );
@@ -60,7 +61,7 @@ class OSCNScraper {
         dateString,
         caseNumber,
         barcode,
-        attempt = 0
+        attempts = 0
     ) => {
         const dateParts = dateString.split("-");
         const directory = `./files/${dateParts[2]}/${dateParts[0]}-${dateParts[1]}`;
@@ -79,7 +80,7 @@ class OSCNScraper {
             })
             .on("error", async (error) => {
                 console.log(error);
-                if ((attempts = 5)) {
+                if (attempts == 5) {
                     console.log(
                         `Tried to get page ${url} five times and failed.`
                     );
@@ -91,7 +92,7 @@ class OSCNScraper {
                     dateString,
                     caseNumber,
                     barcode,
-                    attempt + 1
+                    attempts + 1
                 );
             });
     };
@@ -104,26 +105,30 @@ class OSCNScraper {
     searchDayReportPage = async (pageContent, dateString) => {
         console.log(`searching for cases on ${dateString}`);
 
-        const $ = cheerio.load(pageContent);
-        let links = [];
+        const dom = new JSDOM(pageContent);
 
-        $(".clspg a").each((i, e) => {
-            links.push($(e).attr("href"));
-        });
+        let links = [...dom.window.document.querySelectorAll(".clspg a")]
+            .filter((d) => d.href)
+            .map((d) => d.href);
 
+        // for each link on that days page
         for (let index = 0; index < links.length; index++) {
             const link = links[index];
 
             const linkPage = await this.getPage(`${this.baseURL}${link}`);
-            const $link = cheerio.load(linkPage);
+            const linkDom = new JSDOM(linkPage);
 
             let hasForcibleEntry = false;
 
-            const textTags = $link(".docketEntry font > font");
+            const textTags = [
+                ...linkDom.window.document.querySelectorAll(
+                    ".docketEntry font > font"
+                ),
+            ].map((d) => d.textContent);
 
+            // check for eviction text
             for (let index = 0; index < textTags.length; index++) {
-                const tag = textTags[index];
-                const text = $(tag).text();
+                const text = textTags[index];
                 hasForcibleEntry = this.evictionText.test(text);
 
                 if (hasForcibleEntry) break;
@@ -131,22 +136,25 @@ class OSCNScraper {
 
             if (!hasForcibleEntry) continue;
 
-            $link(".docketEntry a").each(async (i, e) => {
-                const imageUrl = $(e).attr("href");
-                const queryParams = imageUrl.split("&");
-                const barcode =
-                    queryParams[queryParams.length - 1].split("=")[1];
-                const caseNumber =
-                    queryParams[queryParams.length - 3].split("=")[1];
-                const fileURL = `${this.baseURL}${imageUrl}`;
+            // if eviction text then grab the files
+            [...linkDom.window.document.querySelectorAll(".docketEntry a")]
+                .filter((d) => d.href)
+                .forEach(async (d) => {
+                    const imageUrl = d.href;
+                    const queryParams = imageUrl.split("&");
+                    const barcode =
+                        queryParams[queryParams.length - 1].split("=")[1];
+                    const caseNumber =
+                        queryParams[queryParams.length - 3].split("=")[1];
+                    const fileURL = `${this.baseURL}${imageUrl}`;
 
-                await this.downloadFile(
-                    fileURL,
-                    dateString,
-                    caseNumber,
-                    barcode
-                );
-            });
+                    await this.downloadFile(
+                        fileURL,
+                        dateString,
+                        caseNumber,
+                        barcode
+                    );
+                });
         }
     };
 }
