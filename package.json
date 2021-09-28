@@ -2,7 +2,7 @@
   "name": "oscn-scraper",
   "version": "1.0.0",
   "description": "",
-  "main": "src/index.js",
+  "main": "src/index.mjs",
   "scripts": {
     "start": "node src/index.mjs",
     "clean": "rm -rf node_modules && rm -rf files && mkdir files"
