@@ -2,9 +2,12 @@
   "name": "oscn-scraper",
   "version": "1.0.0",
   "description": "",
-  "main": "src/index.mjs",
+  "main": "src/index.js",
+  "bin": {
+    "oscn": "src/cli.js"
+  },
   "scripts": {
-    "start": "node src/index.mjs",
+    "start": "node src/start.js",
     "clean": "rm -rf node_modules && rm -rf files && mkdir files"
   },
   "keywords": [],
@@ -13,6 +16,7 @@
   "dependencies": {
     "date-fns": "^2.24.0",
     "jsdom": "^17.0.0",
-    "node": "^14.17.6"
+    "node": "^14.17.6",
+    "yargs": "^17.2.1"
   }
 }

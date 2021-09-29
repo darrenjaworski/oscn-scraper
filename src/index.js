@@ -1,23 +1,39 @@
-import datefns from "date-fns";
-import fs from "fs";
-import https from "https";
-import jsdom from "jsdom";
+const datefns = require("date-fns");
+const fs = require("fs");
+const https = require("https");
+const jsdom = require("jsdom");
 
 const { JSDOM } = jsdom;
-const { format, addDays, compareDesc } = datefns;
+const { format, addDays, compareDesc, isAfter, isValid } = datefns;
 const sleep = () =>
     new Promise((resolve) => setTimeout(resolve, Math.random() * 2000));
 
 class OSCNScraper {
     baseURL = "https://www.oscn.net/applications/oscn/";
-    startDate = new Date(2017, 0, 1); // month is zero indexed, start of the year;
-    endDate = new Date();
     evictionText = RegExp("FORCIBLE ENTRY & DETAINER");
 
-    main = async () => {
-        let searchDate = this.startDate;
+    startDate = new Date(2017, 0, 1); // month is zero indexed, start of the year;
+    endDate = new Date();
+
+    main = async (start = this.startDate, end = this.endDate) => {
+        let searchDate = start;
+        const endIsAfterStart = isAfter(start, end);
+
+        if (endIsAfterStart) {
+            console.log(`start - ${start} is after end - ${end}`);
+            return;
+        }
+        if (!isValid(start)) {
+            console.log(`start - ${start} is not a valid date`);
+            return;
+        }
+        if (!isValid(end)) {
+            console.log(`end - ${end} is not a valid date`);
+            return;
+        }
+
         // loop through dates
-        while (compareDesc(searchDate, this.endDate) > 0) {
+        while (compareDesc(searchDate, end) > 0) {
             const url = this.getSearchUrl(searchDate);
             const reportPage = await this.getPage(url);
 
@@ -162,4 +178,4 @@ class OSCNScraper {
 
 const scraper = new OSCNScraper();
 
-scraper.main();
+module.exports = OSCNScraper;
