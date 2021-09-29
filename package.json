@@ -16,7 +16,9 @@
   "dependencies": {
     "date-fns": "^2.24.0",
     "jsdom": "^17.0.0",
-    "node": "^14.17.6",
     "yargs": "^17.2.1"
+  },
+  "engines": {
+    "node": ">=12"
   }
 }
