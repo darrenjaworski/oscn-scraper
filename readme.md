@@ -31,5 +31,6 @@ $ npm i -g .
 $ oscn
 
 // usage
+// dates are in MMDDYYYY format
 $ oscn -s 01012020 -e 01012021
 ```
