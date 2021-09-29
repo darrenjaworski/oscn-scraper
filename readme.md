@@ -4,7 +4,7 @@ Make some oklahoma court records more accessible.
 
 ## getting started
 
-To run locally you will need Node. Recommend the Node LTS version at the present time.
+To run locally you will need Node. Recommend the Node LTS version (at least version 12+) at the present time.
 
 To run the script:
 
