@@ -176,6 +176,4 @@ class OSCNScraper {
     };
 }
 
-const scraper = new OSCNScraper();
-
 module.exports = OSCNScraper;
