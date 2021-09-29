@@ -21,3 +21,15 @@ $ npm run clean
 
 $ npm install
 ```
+
+For CLI usage:
+
+```bash
+$ npm i -g .
+
+// to show options
+$ oscn
+
+// usage
+$ oscn -s 01012020 -e 01012021
+```
