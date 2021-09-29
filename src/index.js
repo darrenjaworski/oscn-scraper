@@ -12,7 +12,7 @@ class OSCNScraper {
     baseURL = "https://www.oscn.net/applications/oscn/";
     evictionText = RegExp("FORCIBLE ENTRY & DETAINER");
 
-    startDate = new Date(2017, 0, 1); // month is zero indexed, start of the year;
+    startDate = new Date(2018, 0, 1); // month is zero indexed, start of the year;
     endDate = new Date();
 
     main = async (start = this.startDate, end = this.endDate) => {
@@ -80,7 +80,7 @@ class OSCNScraper {
         attempts = 0
     ) => {
         const dateParts = dateString.split("-");
-        const directory = `../files/${dateParts[2]}/${dateParts[0]}-${dateParts[1]}`;
+        const directory = `./files/${dateParts[2]}/${dateParts[0]}-${dateParts[1]}`;
         const filePath = `${directory}/${caseNumber}-${barcode}.tif`;
 
         if (fs.existsSync(filePath)) return;
