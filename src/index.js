@@ -10,7 +10,7 @@ const sleep = () =>
 
 class OSCNScraper {
     baseURL = "https://www.oscn.net/applications/oscn/";
-    evictionText = RegExp("FORCIBLE ENTRY & DETAINER");
+    evictionText = new RegExp("FORCIBLE ENTRY & DETAINER");
 
     startDate = new Date(2018, 0, 1); // month is zero indexed, start of the year;
     endDate = new Date();
@@ -135,21 +135,15 @@ class OSCNScraper {
             const linkPage = await this.getPage(`${this.baseURL}${link}`);
             const linkDom = new JSDOM(linkPage);
 
-            let hasForcibleEntry = false;
-
             const textTags = [
                 ...linkDom.window.document.querySelectorAll(
                     ".docketEntry font > font"
                 ),
             ].map((d) => d.textContent);
 
-            // check for eviction text
-            for (let index = 0; index < textTags.length; index++) {
-                const text = textTags[index];
-                hasForcibleEntry = this.evictionText.test(text);
-
-                if (hasForcibleEntry) break;
-            }
+            const hasForcibleEntry = textTags.some((d) =>
+                this.evictionText.test(d)
+            );
 
             if (!hasForcibleEntry) continue;
 
@@ -157,13 +151,13 @@ class OSCNScraper {
             [...linkDom.window.document.querySelectorAll(".docketEntry a")]
                 .filter((d) => d.href)
                 .forEach(async (d) => {
-                    const imageUrl = d.href;
-                    const queryParams = imageUrl.split("&");
+                    const imageURL = d.href;
+                    const queryParams = imageURL.split("&");
                     const barcode =
                         queryParams[queryParams.length - 1].split("=")[1];
                     const caseNumber =
                         queryParams[queryParams.length - 3].split("=")[1];
-                    const fileURL = `${this.baseURL}${imageUrl}`;
+                    const fileURL = `${this.baseURL}${imageURL}`;
 
                     await this.downloadFile(
                         fileURL,
