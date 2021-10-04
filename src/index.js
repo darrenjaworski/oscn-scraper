@@ -132,15 +132,13 @@ class OSCNScraper {
             const linkPage = await this.getPage(`${this.baseURL}${link}`);
             const linkDom = new JSDOM(linkPage);
 
-            const textTags = [
+            const hasForcibleEntry = [
                 ...linkDom.window.document.querySelectorAll(
                     ".docketEntry font > font"
                 ),
-            ].map((d) => d.textContent);
-
-            const hasForcibleEntry = textTags.some((d) =>
-                this.evictionText.test(d)
-            );
+            ]
+                .map((d) => d.textContent)
+                .some((d) => this.evictionText.test(d));
 
             if (!hasForcibleEntry) continue;
 
