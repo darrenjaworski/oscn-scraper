@@ -20,16 +20,13 @@ class OSCNScraper {
         const endIsAfterStart = isAfter(start, end);
 
         if (endIsAfterStart) {
-            console.log(`start - ${start} is after end - ${end}`);
-            return;
+            throw new Error(`start - ${start} is after end - ${end}`);
         }
         if (!isValid(start)) {
-            console.log(`start - ${start} is not a valid date`);
-            return;
+            throw new Error(`start - ${start} is not a valid date`);
         }
         if (!isValid(end)) {
-            console.log(`end - ${end} is not a valid date`);
-            return;
+            throw new Error(`end - ${end} is not a valid date`);
         }
 
         // loop through dates
