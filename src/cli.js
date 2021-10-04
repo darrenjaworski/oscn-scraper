@@ -20,9 +20,9 @@ const options = yargs
 
 // date validation
 const start = new Date();
-const sDate = parseInt(options.startDate.slice(2, 3));
+const sDate = parseInt(options.startDate.slice(2, 4));
 const sYear = parseInt(options.startDate.slice(4));
-const sMon = parseInt(options.startDate.slice(0, 1));
+const sMon = parseInt(options.startDate.slice(0, 2));
 
 start.setDate(sDate);
 start.setFullYear(sYear);
@@ -30,9 +30,9 @@ start.setMonth(sMon - 1);
 
 const end = new Date();
 
-const eDate = parseInt(options.endDate.slice(2, 3));
+const eDate = parseInt(options.endDate.slice(2, 4));
 const eYear = parseInt(options.endDate.slice(4));
-const eMon = parseInt(options.endDate.slice(0, 1));
+const eMon = parseInt(options.endDate.slice(0, 2));
 
 end.setDate(eDate);
 end.setFullYear(eYear);
