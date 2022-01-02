@@ -32,6 +32,6 @@ $ oscn
 
 // usage
 // dates are in MMDDYYYY format
-// options are --startDate or -s and --endDate or -e
-$ oscn -s 01012020 -e 01012021
+// options are --startDate or -s and --endDate or -e and --query or -q
+$ oscn -s 01012020 -e 01012021 -q "Oklahoma housing authority"
 ```
