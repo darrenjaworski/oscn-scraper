@@ -78,16 +78,14 @@ class OSCNScraper {
 
     downloadFile = async (
         url,
-        dateString,
         caseNumber,
         barcode,
         matchName = "",
         attempts = 0
     ) => {
-        const dateParts = dateString.split("-");
-        const topLevelDir = matchName ? matchName : "file";
-        const directory = `./${topLevelDir}/${dateParts[2]}/${dateParts[0]}-${dateParts[1]}`;
-        const filePath = `${directory}/${caseNumber}-${barcode}.tif`;
+        const topLevelDir = matchName ? `/search-term/${matchName}` : "cases";
+        const directory = `./${topLevelDir}/${caseNumber}`;
+        const filePath = `${directory}/${barcode}.tif`;
 
         if (fs.existsSync(filePath)) return;
 
@@ -112,7 +110,6 @@ class OSCNScraper {
                 await sleep();
                 return await this.downloadFile(
                     url,
-                    dateString,
                     caseNumber,
                     barcode,
                     matchName,
@@ -135,11 +132,10 @@ class OSCNScraper {
         let links = [...dom.window.document.querySelectorAll(".clspg")]
             .filter((row) => {
                 const contentString = row.innerHTML;
-                const isEviction = this.evictionText.test(contentString);
 
-                if (!searchString) return isEviction;
+                if (!searchString) return true;
 
-                return isEviction && searchRegEx.test(contentString);
+                return searchRegEx.test(contentString);
             })
             .map((d) => d.querySelector("a").href);
 
@@ -180,7 +176,6 @@ class OSCNScraper {
 
                     await this.downloadFile(
                         fileURL,
-                        dateString,
                         caseNumber,
                         barcode,
                         match
