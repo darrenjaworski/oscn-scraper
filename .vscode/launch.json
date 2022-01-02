@@ -5,13 +5,14 @@
     "version": "0.2.0",
     "configurations": [
     {
-        "name": "npm start",
+        "name": "run index",
         "request": "launch",
         "runtimeArgs": [
             "run-script",
             "start"
         ],
         "runtimeExecutable": "npm",
+        "outputCapture": "std",
         "skipFiles": [
             "<node_internals>/**"
         ],

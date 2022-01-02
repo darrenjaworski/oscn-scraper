@@ -10,12 +10,18 @@ const sleep = () =>
 
 class OSCNScraper {
     baseURL = "https://www.oscn.net/applications/oscn/";
-    evictionText = new RegExp("FORCIBLE ENTRY & DETAINER");
+    evictionText = new RegExp(
+        "FORCIBLE ENTRY & DETAINER|FORCIBLE ENTRY &amp; DETAINER"
+    );
 
     startDate = new Date(2018, 0, 1); // month is zero indexed, start of the year;
     endDate = new Date();
 
-    main = async (start = this.startDate, end = this.endDate) => {
+    main = async (
+        start = this.startDate,
+        end = this.endDate,
+        searchString = ""
+    ) => {
         let searchDate = start;
         const endIsAfterStart = isAfter(start, end);
 
@@ -36,7 +42,8 @@ class OSCNScraper {
 
             this.searchDayReportPage(
                 reportPage,
-                format(searchDate, "MM-dd-yyyy")
+                format(searchDate, "MM-dd-yyyy"),
+                searchString
             );
 
             searchDate = addDays(searchDate, 1);
@@ -74,10 +81,12 @@ class OSCNScraper {
         dateString,
         caseNumber,
         barcode,
+        matchName = "",
         attempts = 0
     ) => {
         const dateParts = dateString.split("-");
-        const directory = `./files/${dateParts[2]}/${dateParts[0]}-${dateParts[1]}`;
+        const topLevelDir = matchName ? matchName : "file";
+        const directory = `./${topLevelDir}/${dateParts[2]}/${dateParts[0]}-${dateParts[1]}`;
         const filePath = `${directory}/${caseNumber}-${barcode}.tif`;
 
         if (fs.existsSync(filePath)) return;
@@ -106,6 +115,7 @@ class OSCNScraper {
                     dateString,
                     caseNumber,
                     barcode,
+                    matchName,
                     attempts + 1
                 );
             });
@@ -116,14 +126,24 @@ class OSCNScraper {
         return `${this.baseURL}report.asp?report=WebJudicialDocketEventAll&errorcheck=true&database=&db=Oklahoma&EventCode=72440&StartDate=${urlEncodedDate}&GeneralNumber=1&generalnumber1=1`;
     };
 
-    searchDayReportPage = async (pageContent, dateString) => {
+    searchDayReportPage = async (pageContent, dateString, searchString) => {
         console.log(`searching for cases on ${dateString}`);
 
+        const searchRegEx = searchString && new RegExp(searchString, "i");
         const dom = new JSDOM(pageContent);
 
-        let links = [...dom.window.document.querySelectorAll(".clspg a")]
-            .filter((d) => d.href)
-            .map((d) => d.href);
+        let links = [...dom.window.document.querySelectorAll(".clspg")]
+            .filter((row) => {
+                const contentString = row.innerHTML;
+                const isEviction = this.evictionText.test(contentString);
+
+                if (!searchString) return isEviction;
+
+                return isEviction && searchRegEx.test(contentString);
+            })
+            .map((d) => d.querySelector("a").href);
+
+        if (!links.length) return;
 
         // for each link on that days page
         for (let index = 0; index < links.length; index++) {
@@ -153,12 +173,17 @@ class OSCNScraper {
                     const caseNumber =
                         queryParams[queryParams.length - 3].split("=")[1];
                     const fileURL = `${this.baseURL}${imageURL}`;
+                    const snakeMatch = searchString
+                        .replace(/\s/g, "-")
+                        .toLowerCase();
+                    const match = snakeMatch ? snakeMatch : "";
 
                     await this.downloadFile(
                         fileURL,
                         dateString,
                         caseNumber,
-                        barcode
+                        barcode,
+                        match
                     );
                 });
         }

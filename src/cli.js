@@ -16,6 +16,12 @@ const options = yargs
         describe: "End Date",
         type: "string",
         demandOption: true,
+    })
+    .option("q", {
+        alias: "query",
+        describe: "Search query (string)",
+        type: "string",
+        demandOption: false,
     }).argv;
 
 // date validation
@@ -38,5 +44,7 @@ end.setDate(eDate);
 end.setFullYear(eYear);
 end.setMonth(eMon - 1);
 
+const searchString = options.query;
+
 const scraper = new OSCNScraper();
-scraper.main(start, end);
+scraper.main(start, end, searchString);
